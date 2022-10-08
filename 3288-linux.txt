@@ -1,0 +1,446 @@
+
+rk-linux-sdk
+
+4.4
+./repo init --repo-url ssh://git@www.rockchip.com.cn/repo/rk/tools/repo \
+-u ssh://git@www.rockchip.com.cn/linux/rockchip/platform/manifests \
+-b linux \
+-m rk3288_linux_release.xml
+4.19
+./repo init --repo-url ssh://git@www.rockchip.com.cn/repo/rk/tools/repo \
+-u ssh://git@www.rockchip.com.cn/linux/rockchip/platform/manifests \
+-b linux \
+-m rk3288_linux4.19_release.xml
+
+.repo/repo/repo sync -c --no-tags -j4
+
+tar -cf rk3288_linux4.19_release_v1.2.0_20220620.tar .repo/
+tar -czvf rk3288_linux4.19_release_v1.2.0_20220620-src.tar.gz --exclude=linux/.repo linux/
+
+cd linux_sdk/linux/
+find . -name ".git" | xargs rm -rf
+git init
+git add . -f
+git commit -m "rk3288_linux4.19_release_v1.2.0_20220620."
+git remote add origin git@gitee.com:gq213/linux-sdk-rk3288.git
+git push -u origin master
+
+firefly-sdk
+
+tar -xf rk3288_linux_release_20210304.tgz 
+cd rk3288_linux_release_20210304/
+.repo/repo/repo sync -l
+
+.repo/repo/repo sync -c --no-tags
+.repo/repo/repo start firefly --all
+
+android-kernel
+
+git clone https://mirrors.ustc.edu.cn/aosp/kernel/common.git
+git checkout remotes/origin/android-4.19-stable
+
+compile
+./build.sh device/rockchip/rk3288/BoardConfig-rk3288-firefly.mk
+./build.sh all
+./build.sh firmware
+
+source buildroot/build/envsetup.sh
+29. rockchip_rk3288
+
+uboot
+./make.sh firefly-rk3288
+	make firefly-rk3288_defconfig
+./make.sh
+
+cd kernel
+make ARCH=arm rockchip_linux_defconfig ff3288.config
+make ARCH=arm rk3288-firefly.img -j8
+
+mkdir -p ../rockdev
+ln -sf  ../kernel/zboot.img ../rockdev/boot.img
+
+
+
+
+
+
+cat /sys/kernel/debug/gpio
+
+cat /sys/kernel/debug/dw-hdmi/status
+
+PHY: enabled                    Mode: HDMI
+Pixel Clk: 148500000Hz          TMDS Clk: 148500000Hz
+Color Format: RGB               Color Depth: 8 bit
+Colorimetry: ITU.BT709          EOTF: Unsupported
+
+cat /sys/kernel/debug/clk/clk_summary | grep vop
+
+          dclk_vop1                   1        3        0   148500000          0     0  50000
+                hclk_vop0             1        5        0    99000000          0     0  50000
+                hclk_vop1             1        5        0    99000000          0     0  50000
+             aclk_vop1                1        5        0   297000000          0     0  50000
+             aclk_vop0                1        5        0   594000000          0     0  50000
+          dclk_vop0                   1        3        0   148500000          0     0  50000
+
+cat /sys/kernel/debug/dri/0/summary
+
+VOP [ff930000.vop]: ACTIVE
+    Connector: HDMI-A
+        bus_format[100a]: RGB888_1X24
+        overlay_mode[0] output_mode[f] color_space[0]
+    Display mode: 1920x1080p60
+        clk[148500] real_clk[148500] type[48] flag[5]
+        H: 1920 2008 2052 2200
+        V: 1080 1084 1089 1125
+    win0-0: ACTIVE
+        format: RG16 little-endian (0x36314752) SDR[0] color_space[0]
+        csc: y2r[0] r2r[0] r2y[0] csc mode[0]
+        zpos: 0
+        src: pos[0x0] rect[654x270]
+        dst: pos[633x405] rect[654x270]
+        buf[0]: addr: 0x7df00000 pitch: 1308 offset: 397312
+    win1-0: DISABLED
+    win2-0: DISABLED
+    win3-0: DISABLED
+    post: sdr2hdr[0] hdr2sdr[0]
+    pre : sdr2hdr[0]
+    post CSC: r2y[0] y2r[0] CSC mode[1]
+VOP [ff940000.vop]: ACTIVE
+    Connector: DPI
+        bus_format[100a]: RGB888_1X24
+        overlay_mode[0] output_mode[0] color_space[0]
+    Display mode: 1920x1080p60
+        clk[148500] real_clk[148500] type[48] flag[a]
+        H: 1920 2008 2052 2200
+        V: 1080 1084 1089 1125
+    win0-0: ACTIVE
+        format: RG16 little-endian (0x36314752) SDR[0] color_space[0]
+        csc: y2r[0] r2r[0] r2y[0] csc mode[0]
+        zpos: 0
+        src: pos[0x0] rect[654x270]
+        dst: pos[633x405] rect[654x270]
+        buf[0]: addr: 0x7df00000 pitch: 1308 offset: 397312
+    win1-0: DISABLED
+    win2-0: DISABLED
+    win3-0: DISABLED
+    post: sdr2hdr[0] hdr2sdr[0]
+    pre : sdr2hdr[0]
+    post CSC: r2y[0] y2r[0] CSC mode[1]
+
+tr '\000' '\377' < /dev/zero | dd of=/dev/fb0 bs=1k count=8100
+
+echo on > /sys/class/drm/card0-HDMI-A-1/status
+echo off > /sys/class/drm/card0-HDMI-A-1/status
+
+cat /sys/kernel/debug/dri/0/mm_dump
+
+0x0000000000000000-0x00000000007e9000: 8294400: used
+0x00000000007e9000-0x00000000007ed000: 16384: used
+0x00000000007ed000-0x00000000007f1000: 16384: used
+0x00000000007f1000-0x00000000007f5000: 16384: used
+0x00000000007f5000-0x00000000007f9000: 16384: used
+0x00000000007f9000-0x0000000000fe2000: 8294400: used
+0x0000000000fe2000-0x00000000017cb000: 8294400: used
+0x00000000017cb000-0x0000000001fb4000: 8294400: used
+0x0000000001fb4000-0x0000000100000000: 4261724160: free
+total: 4294967296, used 33243136 free 4261724160
+
+
+
+cat /sys/kernel/debug/asoc/dais 
+i2s-hifi
+ff890000.i2s
+es8328-hifi-analog
+snd-soc-dummy-dai
+
+amixer controls
+numid=13,iface=CARD,name='Analog Jack'
+numid=9,iface=MIXER,name='PCM Volume'
+numid=12,iface=MIXER,name='Mic PGA Volume'
+numid=1,iface=MIXER,name='Capture Digital Volume'
+numid=4,iface=MIXER,name='Capture Polarity'
+numid=2,iface=MIXER,name='Capture ZC Switch'
+numid=17,iface=MIXER,name='Analog Switch'
+numid=3,iface=MIXER,name='DAC Deemphasis Switch'
+numid=19,iface=MIXER,name='Differential Mux'
+numid=18,iface=MIXER,name='HDMI Switch'
+numid=23,iface=MIXER,name='Left Line Mux'
+numid=26,iface=MIXER,name='Left Mixer Left Bypass Switch'
+numid=5,iface=MIXER,name='Left Mixer Left Bypass Volume'
+numid=25,iface=MIXER,name='Left Mixer Playback Switch'
+numid=28,iface=MIXER,name='Left Mixer Right Bypass Switch'
+numid=6,iface=MIXER,name='Left Mixer Right Bypass Volume'
+numid=27,iface=MIXER,name='Left Mixer Right Playback Switch'
+numid=21,iface=MIXER,name='Left PGA Mux'
+numid=10,iface=MIXER,name='Output 1 Playback Volume'
+numid=11,iface=MIXER,name='Output 2 Playback Volume'
+numid=24,iface=MIXER,name='Right Line Mux'
+numid=30,iface=MIXER,name='Right Mixer Left Bypass Switch'
+numid=7,iface=MIXER,name='Right Mixer Left Bypass Volume'
+numid=29,iface=MIXER,name='Right Mixer Left Playback Switch'
+numid=31,iface=MIXER,name='Right Mixer Playback Switch'
+numid=32,iface=MIXER,name='Right Mixer Right Bypass Switch'
+numid=8,iface=MIXER,name='Right Mixer Right Bypass Volume'
+numid=22,iface=MIXER,name='Right PGA Mux'
+numid=20,iface=MIXER,name='Route'
+numid=16,iface=PCM,name='AUDIO MODE'
+numid=15,iface=PCM,name='ELD'
+numid=14,iface=PCM,name='Playback Channel Map'
+
+amixer contents
+numid=13,iface=CARD,name='Analog Jack'
+  ; type=BOOLEAN,access=r-------,values=1
+  : values=off
+numid=9,iface=MIXER,name='PCM Volume'
+  ; type=INTEGER,access=rw---R--,values=2,min=0,max=192,step=0
+  : values=0,0
+  | dBscale-min=-96.00dB,step=0.50dB,mute=0
+numid=12,iface=MIXER,name='Mic PGA Volume'
+  ; type=INTEGER,access=rw---R--,values=2,min=0,max=8,step=0
+  : values=0,0
+  | dBscale-min=0.00dB,step=3.00dB,mute=0
+numid=1,iface=MIXER,name='Capture Digital Volume'
+  ; type=INTEGER,access=rw---R--,values=2,min=0,max=192,step=0
+  : values=0,0
+  | dBscale-min=-96.00dB,step=0.50dB,mute=0
+numid=4,iface=MIXER,name='Capture Polarity'
+  ; type=ENUMERATED,access=rw------,values=1,items=4
+  ; Item #0 'Normal'
+  ; Item #1 'L Invert'
+  ; Item #2 'R Invert'
+  ; Item #3 'L + R Invert'
+  : values=0
+numid=2,iface=MIXER,name='Capture ZC Switch'
+  ; type=BOOLEAN,access=rw------,values=1
+  : values=off
+numid=17,iface=MIXER,name='Analog Switch'
+  ; type=BOOLEAN,access=rw------,values=1
+  : values=off
+numid=3,iface=MIXER,name='DAC Deemphasis Switch'
+  ; type=BOOLEAN,access=rw------,values=1
+  : values=off
+numid=19,iface=MIXER,name='Differential Mux'
+  ; type=ENUMERATED,access=rw------,values=1,items=2
+  ; Item #0 'Line 1'
+  ; Item #1 'Line 2'
+  : values=0
+numid=18,iface=MIXER,name='HDMI Switch'
+  ; type=BOOLEAN,access=rw------,values=1
+  : values=on
+numid=23,iface=MIXER,name='Left Line Mux'
+  ; type=ENUMERATED,access=rw------,values=1,items=4
+  ; Item #0 'Line 1'
+  ; Item #1 'Line 2'
+  ; Item #2 'PGA'
+  ; Item #3 'Differential'
+  : values=0
+numid=26,iface=MIXER,name='Left Mixer Left Bypass Switch'
+  ; type=BOOLEAN,access=rw------,values=1
+  : values=off
+numid=5,iface=MIXER,name='Left Mixer Left Bypass Volume'
+  ; type=INTEGER,access=rw---R--,values=1,min=0,max=7,step=0
+  : values=0
+  | dBscale-min=-15.00dB,step=3.00dB,mute=0
+numid=25,iface=MIXER,name='Left Mixer Playback Switch'
+  ; type=BOOLEAN,access=rw------,values=1
+  : values=off
+numid=28,iface=MIXER,name='Left Mixer Right Bypass Switch'
+  ; type=BOOLEAN,access=rw------,values=1
+  : values=off
+numid=6,iface=MIXER,name='Left Mixer Right Bypass Volume'
+  ; type=INTEGER,access=rw---R--,values=1,min=0,max=7,step=0
+  : values=2
+  | dBscale-min=-15.00dB,step=3.00dB,mute=0
+numid=27,iface=MIXER,name='Left Mixer Right Playback Switch'
+  ; type=BOOLEAN,access=rw------,values=1
+  : values=off
+numid=21,iface=MIXER,name='Left PGA Mux'
+  ; type=ENUMERATED,access=rw------,values=1,items=4
+  ; Item #0 'Line 1'
+  ; Item #1 'Line 2'
+  ; Item #2 'Line 3'
+  ; Item #3 'Differential'
+  : values=0
+numid=10,iface=MIXER,name='Output 1 Playback Volume'
+  ; type=INTEGER,access=rw---R--,values=2,min=0,max=36,step=0
+  : values=0,0
+  | dBscale-min=-30.00dB,step=1.00dB,mute=0
+numid=11,iface=MIXER,name='Output 2 Playback Volume'
+  ; type=INTEGER,access=rw---R--,values=2,min=0,max=36,step=0
+  : values=0,0
+  | dBscale-min=-30.00dB,step=1.00dB,mute=0
+numid=24,iface=MIXER,name='Right Line Mux'
+  ; type=ENUMERATED,access=rw------,values=1,items=4
+  ; Item #0 'Line 1'
+  ; Item #1 'Line 2'
+  ; Item #2 'PGA'
+  ; Item #3 'Differential'
+  : values=0
+numid=30,iface=MIXER,name='Right Mixer Left Bypass Switch'
+  ; type=BOOLEAN,access=rw------,values=1
+  : values=off
+numid=7,iface=MIXER,name='Right Mixer Left Bypass Volume'
+  ; type=INTEGER,access=rw---R--,values=1,min=0,max=7,step=0
+  : values=2
+  | dBscale-min=-15.00dB,step=3.00dB,mute=0
+numid=29,iface=MIXER,name='Right Mixer Left Playback Switch'
+  ; type=BOOLEAN,access=rw------,values=1
+  : values=off
+numid=31,iface=MIXER,name='Right Mixer Playback Switch'
+  ; type=BOOLEAN,access=rw------,values=1
+  : values=off
+numid=32,iface=MIXER,name='Right Mixer Right Bypass Switch'
+  ; type=BOOLEAN,access=rw------,values=1
+  : values=off
+numid=8,iface=MIXER,name='Right Mixer Right Bypass Volume'
+  ; type=INTEGER,access=rw---R--,values=1,min=0,max=7,step=0
+  : values=0
+  | dBscale-min=-15.00dB,step=3.00dB,mute=0
+numid=22,iface=MIXER,name='Right PGA Mux'
+  ; type=ENUMERATED,access=rw------,values=1,items=4
+  ; Item #0 'Line 1'
+  ; Item #1 'Line 2'
+  ; Item #2 'Line 3'
+  ; Item #3 'Differential'
+  : values=0
+numid=20,iface=MIXER,name='Route'
+  ; type=ENUMERATED,access=rw------,values=1,items=4
+  ; Item #0 'Stereo'
+  ; Item #1 'Mono (Left)'
+  ; Item #2 'Mono (Right)'
+  ; Item #3 'Digital Mono'
+  : values=0
+numid=16,iface=PCM,name='AUDIO MODE'
+  ; type=INTEGER,access=rw-v----,values=1,min=0,max=2,step=0
+  : values=0
+numid=15,iface=PCM,name='ELD'
+  ; type=BYTES,access=r--v----,values=128
+  : values=0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+numid=14,iface=PCM,name='Playback Channel Map'
+  ; type=INTEGER,access=r----R--,values=8,min=0,max=36,step=0
+  : values=0,0,0,0,0,0,0,0
+  | container
+    | chmap-fixed=FL,FR
+
+echo 20 > /sys/kernel/debug/asoc/I2S/dapm_pop_time
+
+amixer cset numid=25,iface=MIXER,name='Left Mixer Playback Switch' 1;
+amixer cset numid=31,iface=MIXER,name='Right Mixer Playback Switch' 1;
+amixer cset numid=9,iface=MIXER,name='PCM Volume' 192 192;
+amixer cset numid=11,iface=MIXER,name='Output 2 Playback Volume' 18 18;
+
+cat /sys/devices/platform/sound-i2s/Codecs/dapm_widget
+Right ADC: Off
+Left ADC: Off
+Mic Bias: Off
+Mic Bias Gen: Off
+DAC STM: Off
+ADC STM: Off
+DAC DIG: Off
+ADC DIG: Off
+DAC DLL: Off
+ADC DLL: Off
+ADC Vref: Off
+DAC Vref: Off
+Right DAC: Off
+Left DAC: Off
+Left Mixer: Off
+Right Mixer: Off
+Right Out 2: Off
+Left Out 2: Off
+Right Out 1: Off
+Left Out 1: Off
+PM State: Standby
+PM State: Standby
+
+aplay /etc/48k16bpsStereo.wav &
+
+cat /sys/devices/platform/sound-i2s/Codecs/dapm_widget
+Right ADC: Off
+Left ADC: Off
+Mic Bias: Off
+Mic Bias Gen: Off
+DAC STM: On
+ADC STM: Off
+DAC DIG: On
+ADC DIG: Off
+DAC DLL: On
+ADC DLL: Off
+ADC Vref: Off
+DAC Vref: On
+Right DAC: On
+Left DAC: On
+Left Mixer: On
+Right Mixer: On
+Right Out 2: Off
+Left Out 2: Off
+Right Out 1: On
+Left Out 1: On
+PM State: On
+PM State: On
+
+
+
+mkdir -p /var/run/wpa_supplicant
+vi /etc/wpa_supplicant.conf
+wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf
+
+wpa_cli -i wlan0 -p /var/run/wpa_supplicant scan
+wpa_cli -i wlan0 -p /var/run/wpa_supplicant scan_results
+
+wpa_cli -i wlan0 -p /var/run/wpa_supplicant status
+
+killall wpa_supplicant
+
+udhcpc -b -i wlan0 -R -x hostname:bboxwlan0
+
+/etc/init.d/mS49ntp start
+
+bt_init.sh
+root@rk3288:/# hciconfig    
+hci0:   Type: Primary  Bus: UART
+        BD Address: 0E:68:9C:94:07:42  ACL MTU: 1021:8  SCO MTU: 64:1
+        UP RUNNING 
+        RX bytes:687 acl:0 sco:0 events:36 errors:0
+        TX bytes:435 acl:0 sco:0 commands:36 errors:0
+
+hcitool scan
+
+root@rk3288:/# ls -l /dev/disk/by-partlabel/
+total 0
+lrwxrwxrwx    1 root     root            15 Jan  1 12:00 backup -> ../../mmcblk2p6
+lrwxrwxrwx    1 root     root            15 Jan  1 12:00 boot -> ../../mmcblk2p4
+lrwxrwxrwx    1 root     root            15 Jan  1 12:00 misc -> ../../mmcblk2p3
+lrwxrwxrwx    1 root     root            15 Jan  1 12:00 oem -> ../../mmcblk2p7
+lrwxrwxrwx    1 root     root            15 Jan  1 12:00 recovery -> ../../mmcblk2p5
+lrwxrwxrwx    1 root     root            15 Jan  1 12:00 rootfs -> ../../mmcblk2p8
+lrwxrwxrwx    1 root     root            15 Jan  1 12:00 trust -> ../../mmcblk2p2
+lrwxrwxrwx    1 root     root            15 Jan  1 12:00 uboot -> ../../mmcblk2p1
+lrwxrwxrwx    1 root     root            15 Jan  1 12:00 userdata -> ../../mmcblk2p9
+
+mount /dev/disk/by-partlabel/oem /oem
+mount /dev/disk/by-partlabel/userdata /userdata/
+
+mount /dev/mmcblk0p1 /mnt/sdcard/
+
+
+ifconfig eth0 up
+
+udhcpc -b -i eth0 -R -x hostname:bboxeth0
+
+
+
+#!/bin/sh
+
+start="1"
+end="10"
+
+while [ ${start} -le ${end} ]
+do
+	cat /sys/devices/platform/ffa30000.gpu/utilisation
+	echo "start=${start}"
+	sleep 0.2
+	start=$((${start}+1))
+done
+
+
