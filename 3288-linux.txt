@@ -405,6 +405,7 @@ hci0:   Type: Primary  Bus: UART
         TX bytes:435 acl:0 sco:0 commands:36 errors:0
 
 hcitool scan
+hcitool lescan
 
 root@rk3288:/# ls -l /dev/disk/by-partlabel/
 total 0
@@ -443,4 +444,88 @@ do
 	start=$((${start}+1))
 done
 
+
+
+root@rk3288:/# cat /sys/kernel/debug/regulator/regulator_summary
+ regulator                      use open bypass voltage current     min     max
+-------------------------------------------------------------------------------
+ regulator-dummy                  1    8      0     0mV     0mA     0mV     0mV 
+    ff580000.usb-vusb_a                                             0mV     0mV
+    ff580000.usb-vusb_d                                             0mV     0mV
+    ff540000.usb-vusb_a                                             0mV     0mV
+    ff540000.usb-vusb_d                                             0mV     0mV
+    panel-vsn                                                       0mV     0mV
+    panel-vsp                                                       0mV     0mV
+    panel-power                                                     0mV     0mV
+    regulator-dummy                                                 0mV     0mV
+ vcc_sys                          1   13      0  5000mV     0mA  5000mV  5000mV 
+    vcc_sys                                                         0mV     0mV
+    vcc_5v                        1    3      0  5000mV     0mA  5000mV  5000mV 
+       vcc_5v                                                       0mV     0mV
+       vcc_host_5v                1    2      0  5000mV     0mA  5000mV  5000mV 
+          ff540000.usb-vbus                                         0mV     0mV
+          vcc_host_5v                                               0mV     0mV
+       vcc_otg_5v                 0    1      0  5000mV     0mA  5000mV  5000mV 
+          vcc_otg_5v                                                0mV     0mV
+    vdd_cpu                       1    2      0  1150mV     0mA   850mV  1350mV 
+       cpu0-cpu0                                                 1150mV  1350mV
+       vdd_cpu                                                      0mV     0mV
+    vdd_gpu                       1    2      0   950mV     0mA   850mV  1350mV 
+       ffa30000.gpu-mali                                          950mV  1350mV
+       vdd_gpu                                                      0mV     0mV
+    vcc_ddr                       1    1      0  1200mV     0mA  1200mV  1200mV 
+       vcc_ddr                                                      0mV     0mV
+    vcc_io                        1    7      0  3300mV     0mA  3300mV  3300mV 
+       ff0f0000.dwmmc-vmmc                                       3300mV  3400mV
+       ff0d0000.dwmmc-vmmc                                       3300mV  3400mV
+       ff770000.syscon:io-domains-gpio1830                                     0mV     0mV
+       ff770000.syscon:io-domains-gpio30                                     0mV     0mV
+       ff770000.syscon:io-domains-bb                                     0mV     0mV
+       ff770000.syscon:io-domains-lcdc                                     0mV     0mV
+       vcc_io                                                       0mV     0mV
+    vdd_log                       1    2      0  1100mV     0mA   700mV  1500mV 
+       dmc-center                                                1100mV  1500mV
+       vdd_log                                                      0mV     0mV
+    vcc_20                        1    4      0  2000mV     0mA  2000mV  2000mV 
+       vcc_20                                                       0mV     0mV
+       vdd_10                     1    1      0  1000mV     0mA  1000mV  1000mV 
+          vdd_10                                                    0mV     0mV
+       vcc_18                     1    4      0  1800mV     0mA  1800mV  1800mV 
+          ff100000.saradc-vref                                      0mV     0mV
+          ff0d0000.dwmmc-vqmmc                                   1800mV  1950mV
+          ff770000.syscon:io-domains-wifi                                     0mV     0mV
+          vcc_18                                                    0mV     0mV
+       vcc18_lcd                  1    1      0  1850mV     0mA  1850mV  1850mV 
+          vcc18_lcd                                                 0mV     0mV
+    vccio_sd                      1    3      0  3300mV     0mA  1800mV  3300mV 
+       ff0c0000.dwmmc-vqmmc                                      3300mV  3300mV
+       ff770000.syscon:io-domains-sdcard                                     0mV     0mV
+       vccio_sd                                                     0mV     0mV
+    vdd10_lcd                     1    1      0  1050mV     0mA  1050mV  1050mV 
+       vdd10_lcd                                                    0mV     0mV
+    afvdd_28                      0    1      0  2800mV     0mA  2800mV  2800mV 
+       afvdd_28                                                     0mV     0mV
+    vcca_33                       1    6      0  3300mV     0mA  3300mV  3300mV 
+       2-0010-HPVDD                                                 0mV     0mV
+       2-0010-PVDD                                                  0mV     0mV
+       2-0010-AVDD                                                  0mV     0mV
+       2-0010-DVDD                                                  0mV     0mV
+       ff770000.syscon:io-domains-audio                                     0mV     0mV
+       vcca_33                                                      0mV     0mV
+    vcc_lan                       1    3      0  3300mV     0mA  3300mV  3300mV 
+       ff290000.ethernet-phy                                        0mV     0mV
+       ff770000.syscon:io-domains-flash1                                     0mV     0mV
+       vcc_lan                                                      0mV     0mV
+ vcc_sd                           1    2      0  3300mV     0mA  3300mV  3300mV 
+    ff0c0000.dwmmc-vmmc                                          3300mV  3400mV
+    vcc_sd                                                          0mV     0mV
+ vcc_flash                        1    3      0  1800mV     0mA  1800mV  1800mV 
+    ff0f0000.dwmmc-vqmmc                                         1800mV  1950mV
+    ff770000.syscon:io-domains-flash0                                     0mV     0mV
+    vcc_flash                                                       0mV     0mV
+ vcc28_dvp                        0    2      0  2800mV     0mA  2800mV  2800mV 
+    vcc28_dvp                                                       0mV     0mV
+    dovdd_1v8                     0    2      0  1800mV     0mA  1800mV  1800mV 
+       ff770000.syscon:io-domains-dvp                                     0mV     0mV
+       dovdd_1v8                                                    0mV     0mV
 

@@ -4,7 +4,6 @@
  */
 
 /dts-v1/;
-#include <dt-bindings/display/media-bus-format.h>
 #include "rk3288-firefly.dtsi"
 #include "rk3288-linux.dtsi"
 
@@ -13,52 +12,7 @@
 	compatible = "firefly,firefly-rk3288", "rockchip,rk3288";
 
 	chosen {
-		bootargs = "vmalloc=496M rw root=PARTUUID=614e0000-0000 rootfstype=ext4 rootwait earlyprintk";
-	};
-
-	panel {
-		compatible = "simple-panel";
-		enable-gpios = <&gpio0 RK_PC1 GPIO_ACTIVE_HIGH>;
-		bus-format = <MEDIA_BUS_FMT_RGB888_1X24>;
-
-		display-timings {
-			native-mode = <&timing0>;
-
-			timing0: timing0 {
-				clock-frequency = <148500000>;
-				hactive = <1920>;
-				vactive = <1080>;
-				hfront-porch = <88>;
-				hsync-len = <44>;
-				hback-porch = <148>;
-				vfront-porch = <4>;
-				vsync-len = <5>;
-				vback-porch = <36>;
-				hsync-active = <0>;
-				vsync-active = <0>;
-				de-active = <0>;
-				pixelclk-active = <0>;
-			};
-		};
-
-		port {
-			panel_in_rgb: endpoint {
-				remote-endpoint = <&rgb_out_panel>;
-			};
-		};
-	};
-
-	sound-i2s {
-		compatible = "rockchip,rk3288-hdmi-analog";
-		pinctrl-names = "default";
-		pinctrl-0 = <&phone_ctl>, <&hp_det>;
-		rockchip,hp-det-gpios = <&gpio7 RK_PB7 GPIO_ACTIVE_HIGH>;
-		rockchip,hp-en-gpios = <&gpio0 RK_PB2 GPIO_ACTIVE_HIGH>;
-		rockchip,model = "I2S";
-		rockchip,audio-codec = <&es8388>, <&hdmi>;
-		rockchip,i2s-controller = <&i2s>;
-		rockchip,routing = "Analog", "LOUT2",
-				   "Analog", "ROUT2";
+		bootargs = "vmalloc=496M rw root=PARTUUID=614e0000-0000 rootfstype=ext4 rootwait";
 	};
 };
 
@@ -76,96 +30,5 @@
 };
 
 &route_rgb {
-	status = "okay";
-};
-
-&vopb {
-	status = "okay";
-};
-
-&vopb_mmu {
-	status = "okay";
-};
-
-&vopl {
-	status = "okay";
-};
-
-&vopl_mmu {
-	status = "okay";
-};
-
-&hdmi {
-	/delete-property/ pinctrl-names;
-	/delete-property/ pinctrl-0;
-	/delete-property/ pinctrl-1;
-	ddc-i2c-bus = <&i2c5>;
-	status = "okay";
-};
-
-&hdmi_in_vopb {
-	status = "okay";
-};
-
-&hdmi_in_vopl {
-	status = "disabled";
-};
-
-&rgb {
-	status = "okay";
-
-	ports {
-		port@1 {
-			reg = <1>;
-
-			rgb_out_panel: endpoint {
-				remote-endpoint = <&panel_in_rgb>;
-			};
-		};
-	};
-};
-
-&rgb_in_vopb {
-	status = "disabled";
-};
-
-&rgb_in_vopl {
-	status = "okay";
-};
-
-&i2c5 {
-	status = "okay";
-};
-
-&rga {
-	compatible = "rockchip,rga2";
-	clocks = <&cru ACLK_RGA>, <&cru HCLK_RGA>, <&cru SCLK_RGA>;
-	clock-names = "aclk_rga", "hclk_rga", "clk_rga";
-	assigned-clocks = <&cru ACLK_RGA>, <&cru SCLK_RGA>;
-	assigned-clock-rates = <300000000>, <300000000>;
-	status = "okay";
-};
-
-&rng {
-	status = "okay";
-};
-
-&i2c2 {
-	status = "okay";
-
-	es8388: es8388@10 {
-		compatible = "everest,es8388", "everest,es8328";
-		reg = <0x10>;
-		AVDD-supply = <&vcca_33>;
-		DVDD-supply = <&vcca_33>;
-		HPVDD-supply = <&vcca_33>;
-		PVDD-supply = <&vcca_33>;
-		clocks = <&cru SCLK_I2S0_OUT>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&i2s0_mclk>;
-	};
-};
-
-&i2s {
 	status = "okay";
 };
