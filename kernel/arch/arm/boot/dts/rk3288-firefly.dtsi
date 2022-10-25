@@ -117,8 +117,9 @@
 
 	panel {
 		compatible = "simple-panel";
-		enable-gpios = <&gpio0 RK_PC1 GPIO_ACTIVE_HIGH>;
 		bus-format = <MEDIA_BUS_FMT_RGB888_1X24>;
+		enable-gpios = <&gpio0 RK_PC1 GPIO_ACTIVE_HIGH>;
+		//ddc-i2c-bus = <&i2c4>;
 
 		display-timings {
 			native-mode = <&timing0>;
@@ -133,16 +134,16 @@
 				vfront-porch = <4>;
 				vsync-len = <5>;
 				vback-porch = <36>;
-				hsync-active = <0>;
-				vsync-active = <0>;
-				de-active = <0>;
-				pixelclk-active = <0>;
+				hsync-active = <1>;
+				vsync-active = <1>;
+				de-active = <1>;
+				pixelclk-active = <1>;
 			};
 		};
 
 		port {
-			panel_in_rgb: endpoint {
-				remote-endpoint = <&rgb_out_panel>;
+			in_rgb: endpoint {
+				remote-endpoint = <&rgb_out>;
 			};
 		};
 	};
@@ -262,6 +263,7 @@
 		compatible = "silergy,syr827";
 		fcs,suspend-voltage-selector = <1>;
 		reg = <0x40>;
+		regulator-compatible = "fan53555-reg";
 		regulator-name = "vdd_cpu";
 		regulator-min-microvolt = <850000>;
 		regulator-max-microvolt = <1350000>;
@@ -270,6 +272,8 @@
 		regulator-enable-ramp-delay = <300>;
 		regulator-ramp-delay = <8000>;
 		vin-supply = <&vcc_sys>;
+		pinctrl-0 = <&vsel1_gpio>;
+		vsel-gpios = <&gpio0 RK_PA0 GPIO_ACTIVE_HIGH>;
 		regulator-initial-mode = <0x2>;
 		regulator-state-mem {
 			regulator-off-in-suspend;
@@ -280,12 +284,15 @@
 		compatible = "silergy,syr828";
 		fcs,suspend-voltage-selector = <1>;
 		reg = <0x41>;
+		regulator-compatible = "fan53555-reg";
 		regulator-name = "vdd_gpu";
 		regulator-min-microvolt = <850000>;
 		regulator-max-microvolt = <1350000>;
 		regulator-always-on;
 		regulator-ramp-delay = <6000>;
 		vin-supply = <&vcc_sys>;
+		//pinctrl-0 = <&vsel1_gpio>;
+		//vsel-gpios = <&gpio0 RK_PA0 GPIO_ACTIVE_HIGH>;
 		regulator-initial-mode = <0x2>;
 		regulator-state-mem {
 			regulator-off-in-suspend;
@@ -645,6 +652,12 @@
 		};
 	};
 
+	syr82x {
+		vsel1_gpio: vsel1-vsel {
+			rockchip,pins = <0 RK_PA0 RK_FUNC_GPIO &pcfg_output_low>;
+		};
+	};
+
 	hym8563 {
 		rtc_int: rtc-int {
 			rockchip,pins = <7 RK_PA4 RK_FUNC_GPIO &pcfg_pull_up>;
@@ -720,11 +733,6 @@
 	status = "okay";
 };
 
-&rockchip_suspend {
-	/delete-property/ rockchip,pwm-regulator-config;
-	status = "okay";
-};
-
 &vopb {
 	status = "okay";
 };
@@ -764,8 +772,8 @@
 		port@1 {
 			reg = <1>;
 
-			rgb_out_panel: endpoint {
-				remote-endpoint = <&panel_in_rgb>;
+			rgb_out: endpoint {
+				remote-endpoint = <&in_rgb>;
 			};
 		};
 	};
@@ -780,6 +788,10 @@
 };
 
 &i2c5 {
+	status = "okay";
+};
+
+&i2c4 {
 	status = "okay";
 };
 

@@ -52,12 +52,36 @@ uboot
 	make firefly-rk3288_defconfig
 ./make.sh
 
+# CONFIG_USING_KERNEL_DTB is not set
+
 cd kernel
 make ARCH=arm rockchip_linux_defconfig ff3288.config
 make ARCH=arm rk3288-firefly.img -j8
 
 mkdir -p ../rockdev
 ln -sf  ../kernel/zboot.img ../rockdev/boot.img
+
+
+
+Disk /dev/mmcblk2: 30535680 sectors, 2622M
+Logical sector size: 512
+Disk identifier (GUID): a6510000-0000-4c7b-8000-6ff400003ec9
+Partition table holds up to 128 entries
+First usable sector is 34, last usable sector is 30535646
+
+Number  Start (sector)    End (sector)  Size Name
+     1           16384           24575 4096K uboot
+     2           24576           32767 4096K trust
+     3           32768           40959 4096K misc
+     4           40960          106495 32.0M boot
+     5          106496          172031 32.0M recovery
+     6          172032          237567 32.0M backup
+     7          237568          368639 64.0M oem
+     8          368640        12951551 6144M rootfs
+     9        12951552        30535615 8585M userdata
+
+dd if=/dev/zero of=/dev/mmcblk2 bs=512 count=32768
+dd if=/dev/zero of=/dev/mmcblk2 bs=512 count=32768 seek=30502912
 
 
 
@@ -529,3 +553,40 @@ root@rk3288:/# cat /sys/kernel/debug/regulator/regulator_summary
        ff770000.syscon:io-domains-dvp                                     0mV     0mV
        dovdd_1v8                                                    0mV     0mV
 
+
+
+GLOBAL_PWROFF/PMUGPIO0_A0_D				PMIC_SLEEP			syr82x		vsel
+
+DDRIO_PWROFF/PMUGPIO0_A1_D				PWR_HOLD/PWRHOLD	act8846		16PWREN/32PWRHLD
+                         |
+resetkey(low)-------------
+
+pwrkey(low)								POWER_ON			act8846		31NPBIN
+PMUGPIO0_A5_U							PWR_KEY				act8846		9NPBSTAT
+
+ISP_PRELIGHTTRIG/SPI1_RXD/GPIO7_B6_D	PMIC_VSEL			act8846		8/45/44/vsel
+
+UART3_RTSN/GPIO7_B2_U					CPU_DET				MCU_JL8506	p52
+
+syr82x
+When this pin is low, VOUT is set by the VSEL0 register. 
+When this pin is high, VOUT is set by the VSEL1 register.
+
+act8846
+REG2.3.4
+Drive to logic low to select default output voltage.
+Drive to logic high to select secondary output voltage.
+
+复位按下后 DVS0_CTL 恢复成默认状态（低电平），ACT8846内部寄存器切换到 REG0，REG0
+中 DCDC 设置默认值较高，足够系统重启。系统正常运行时 DVS0_CTL 为高，ACT8846切换到 REG1，
+REG1设置平时需要的各路 DCDC 电压（包括 DVFS 的电压调整）
+
+echo 0 > /sys/class/gpio/export;
+echo out > /sys/class/gpio/gpio0/direction;
+echo 0 > /sys/class/gpio/gpio0/value;
+echo 1 > /sys/class/gpio/gpio0/value;
+
+echo 230 > /sys/class/gpio/export;
+echo out > /sys/class/gpio/gpio230/direction;
+echo 0 > /sys/class/gpio/gpio230/value;
+echo 1 > /sys/class/gpio/gpio230/value;
