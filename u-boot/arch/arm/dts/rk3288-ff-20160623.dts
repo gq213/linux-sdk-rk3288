@@ -5,7 +5,7 @@
  */
 
 /dts-v1/;
-#include "rk3288-firefly.dtsi"
+#include "rk3288-ff-20160623.dtsi"
 
 / {
 	model = "Firefly-RK3288";

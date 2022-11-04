@@ -40,12 +40,13 @@ git clone https://mirrors.ustc.edu.cn/aosp/kernel/common.git
 git checkout remotes/origin/android-4.19-stable
 
 compile
-./build.sh device/rockchip/rk3288/BoardConfig-rk3288-firefly.mk
+./build.sh device/rockchip/rk3288/BoardConfig-rk3288-ff.mk
+2. BoardConfig-rk3288-ff.mk
 ./build.sh all
 ./build.sh firmware
 
 source buildroot/build/envsetup.sh
-29. rockchip_rk3288
+30. rockchip_rk3288_ff
 
 uboot
 ./make.sh firefly-rk3288
@@ -581,12 +582,19 @@ Drive to logic high to select secondary output voltage.
 中 DCDC 设置默认值较高，足够系统重启。系统正常运行时 DVS0_CTL 为高，ACT8846切换到 REG1，
 REG1设置平时需要的各路 DCDC 电压（包括 DVFS 的电压调整）
 
+GPIO0_A0
 echo 0 > /sys/class/gpio/export;
 echo out > /sys/class/gpio/gpio0/direction;
 echo 0 > /sys/class/gpio/gpio0/value;
 echo 1 > /sys/class/gpio/gpio0/value;
 
+GPIO7_B6
 echo 230 > /sys/class/gpio/export;
 echo out > /sys/class/gpio/gpio230/direction;
 echo 0 > /sys/class/gpio/gpio230/value;
 echo 1 > /sys/class/gpio/gpio230/value;
+
+GPIO0_A1
+echo 1 > /sys/class/gpio/export;
+echo out > /sys/class/gpio/gpio1/direction;
+echo 0 > /sys/class/gpio/gpio1/value;

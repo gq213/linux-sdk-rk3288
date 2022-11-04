@@ -3,11 +3,11 @@
 # Target arch
 export RK_ARCH=arm
 # Uboot defconfig
-export RK_UBOOT_DEFCONFIG=firefly-rk3288
+export RK_UBOOT_DEFCONFIG=rk3288_ff_uboot
 # Kernel defconfig
-export RK_KERNEL_DEFCONFIG=rockchip_linux_defconfig
+export RK_KERNEL_DEFCONFIG=rk3288_ff_linux_defconfig
 # Kernel dts
-export RK_KERNEL_DTS=rk3288-firefly
+export RK_KERNEL_DTS=rk3288-ff-20160623
 # boot image type
 export RK_BOOT_IMG=zboot.img
 # kernel image path
@@ -15,7 +15,7 @@ export RK_KERNEL_IMG=kernel/arch/arm/boot/zImage
 # parameter for GPT table
 export RK_PARAMETER=parameter.txt
 # Buildroot config
-export RK_CFG_BUILDROOT=rockchip_rk3288
+export RK_CFG_BUILDROOT=rockchip_rk3288_ff
 # Recovery config
 export RK_CFG_RECOVERY=
 # ramboot config
